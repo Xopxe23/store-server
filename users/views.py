@@ -3,6 +3,7 @@ from django.shortcuts import render, HttpResponseRedirect
 from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
 from django.urls import reverse
 from products.models import Basket
+from django.contrib.auth.decorators import login_required
 
 
 def login(request):
@@ -34,6 +35,7 @@ def registration(request):
     return render(request, 'users/register.html', context)
 
 
+@login_required
 def profile(request):
     if request.method == 'POST':
         form = UserProfileForm(instance=request.user, data=request.POST, files=request.FILES)
@@ -42,10 +44,20 @@ def profile(request):
             return HttpResponseRedirect(reverse('users:profile'))
     else:
         form = UserProfileForm(instance=request.user)
+    # baskets = Basket.objects.filter(user=request.user)
+    # total_summ = sum(basket.summ() for basket in baskets)
+    # total_quantity = sum(basket.quantity for basket in baskets)
+    # total_summ = 0
+    # total_quantity = 0
+    # for basket in baskets:
+    #     total_summ += basket.summ()
+    #     total_quantity += basket.quantity
     context = {
         'title': 'Store - Профиль',
         'form': form,
-        'baskets': Basket.objects.all()
+        'baskets': Basket.objects.all(),
+        # 'total_summ': total_summ,
+        # 'total_quantity': total_quantity,
     }
     return render(request, 'users/profile.html', context)
 

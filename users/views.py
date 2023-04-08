@@ -1,7 +1,10 @@
 from django.contrib import auth
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, HttpResponseRedirect
 from django.views.generic import CreateView, UpdateView
+
+from common.views import TitleMixin
 from users.models import User
 from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
 from django.urls import reverse, reverse_lazy
@@ -9,26 +12,23 @@ from products.models import Basket
 from django.contrib.auth.decorators import login_required
 
 
-class UserRegistrationView(CreateView):
+class UserRegistrationView(SuccessMessageMixin, TitleMixin, CreateView):
     model = User
     template_name = 'users/register.html'
     form_class = UserRegistrationForm
     success_url = reverse_lazy('users:login')
-
-    def get_context_data(self, **kwargs):
-        context = super(UserRegistrationView, self).get_context_data()
-        context['title'] = 'Store - Регистрация'
-        return context
+    success_message = 'Вы успешно зарегестрированы!'
+    title = 'Store - Регистрация'
 
 
-class UserProfileView(UpdateView):
+class UserProfileView(TitleMixin, UpdateView):
     model = User
     form_class = UserProfileForm
     template_name = 'users/profile.html'
+    title = 'Store - Личный кабинет'
 
     def get_context_data(self, **kwargs):
         context = super(UserProfileView, self).get_context_data()
-        context['title'] = 'Store - Личный кабинет'
         context['baskets'] = Basket.objects.filter(user=self.request.user)
         return context
 
@@ -36,9 +36,10 @@ class UserProfileView(UpdateView):
         return reverse_lazy('users:profile', args=(self.object.id,))
 
 
-class UserLoginView(LoginView):
+class UserLoginView(TitleMixin, LoginView):
     template_name = 'users/login.html'
     form_class = UserLoginForm
+    title = 'Store - Авторизация'
 
 
 class UserLogoutView(LogoutView):
@@ -50,7 +51,7 @@ class UserLogoutView(LogoutView):
 #         form = UserRegistrationForm(data=request.POST)
 #         if form.is_valid():
 #             form.save()
-#             messages.success(request, 'Поздравляем вы успешно зарегестрировались!')
+#             messages.success(request, 'Поздравляем, вы успешно зарегестрировались!')
 #             return HttpResponseRedirect(reverse('users:login'))
 #     else:
 #         form = UserRegistrationForm()

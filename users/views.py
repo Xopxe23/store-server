@@ -1,7 +1,9 @@
 from django.contrib import auth, messages
 from django.shortcuts import render, HttpResponseRedirect
+from django.views.generic import CreateView, UpdateView
+from users.models import User
 from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from products.models import Basket
 from django.contrib.auth.decorators import login_required
 
@@ -22,17 +24,44 @@ def login(request):
     return render(request, 'users/login.html', context)
 
 
-def registration(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(data=request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Поздравляем вы успешно зарегестрировались!')
-            return HttpResponseRedirect(reverse('users:login'))
-    else:
-        form = UserRegistrationForm()
-    context = {'form': form}
-    return render(request, 'users/register.html', context)
+class UserRegistrationView(CreateView):
+    model = User
+    template_name = 'users/register.html'
+    form_class = UserRegistrationForm
+    success_url = reverse_lazy('users:login')
+
+    def get_context_data(self, **kwargs):
+        context = super(UserRegistrationView, self).get_context_data()
+        context['title'] = 'Store - Регистрация'
+        return context
+
+
+class UserProfileView(UpdateView):
+    model = User
+    form_class = UserProfileForm
+    template_name = 'users/profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(UserProfileView, self).get_context_data()
+        context['title'] = 'Store - Личный кабинет'
+        context['baskets'] = Basket.objects.filter(user=self.request.user)
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('users:profile', args=(self.object.id,))
+
+
+# def registration(request):
+#     if request.method == 'POST':
+#         form = UserRegistrationForm(data=request.POST)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, 'Поздравляем вы успешно зарегестрировались!')
+#             return HttpResponseRedirect(reverse('users:login'))
+#     else:
+#         form = UserRegistrationForm()
+#     context = {'form': form}
+#     return render(request, 'users/register.html', context)
 
 
 @login_required
@@ -55,7 +84,7 @@ def profile(request):
     context = {
         'title': 'Store - Профиль',
         'form': form,
-        'baskets': Basket.objects.all(),
+        'baskets': Basket.objects.filter(user=request.user),
         # 'total_summ': total_summ,
         # 'total_quantity': total_quantity,
     }

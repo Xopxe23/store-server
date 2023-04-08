@@ -28,6 +28,7 @@ SECRET_KEY = 'django-insecure-z&d$1j8a81$c5ud2$dsywxq=ppc6ejj@6j$0)gat*#7n__zupg
 DEBUG = True
 
 ALLOWED_HOSTS = []
+DOMAIN_NAME = 'http://localhost:8000'
 
 
 # Application definition
@@ -66,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'products.context_processors.baskets'
             ],
         },
     },
@@ -138,3 +140,13 @@ AUTH_USER_MODEL = 'users.User'
 LOGIN_URL = '/users/login'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Sending email
+
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'grigoriyizmailov23@yandex.ru'
+EMAIL_HOST_PASSWORD = 'GriIzm23'
+EMAIL_USE_SSL = True
+
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

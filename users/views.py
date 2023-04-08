@@ -1,16 +1,16 @@
 from django.contrib import auth
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.shortcuts import render, HttpResponseRedirect
+from django.shortcuts import HttpResponseRedirect, render
+from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
-from django.views.generic import CreateView, UpdateView, TemplateView
+from django.views.generic import CreateView, TemplateView, UpdateView
 
 from common.views import TitleMixin
-from users.models import User, EmailVerification
-from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
-from django.urls import reverse, reverse_lazy
 from products.models import Basket
-from django.contrib.auth.decorators import login_required
+from users.forms import UserLoginForm, UserProfileForm, UserRegistrationForm
+from users.models import EmailVerification, User
 
 
 class UserRegistrationView(SuccessMessageMixin, TitleMixin, CreateView):
@@ -28,10 +28,10 @@ class UserProfileView(TitleMixin, UpdateView):
     template_name = 'users/profile.html'
     title = 'Store - Личный кабинет'
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(UserProfileView, self).get_context_data()
-    #     context['baskets'] = Basket.objects.filter(user=self.request.user)
-    #     return context
+    def get_context_data(self, **kwargs):
+        context = super(UserProfileView, self).get_context_data()
+        context['baskets'] = Basket.objects.filter(user=self.request.user)
+        return context
 
     def get_success_url(self):
         return reverse_lazy('users:profile', args=(self.object.id,))

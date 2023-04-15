@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils.timezone import now
 
-from .models import User, EmailVerification
+from .models import EmailVerification, User
 
 
 class UserRegistrationViewTestCase(TestCase):

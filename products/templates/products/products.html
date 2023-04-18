@@ -1,5 +1,5 @@
 {% extends 'products/base.html' %}
-{% load static cache %}
+{% load static %}
 {% load humanize %}
 
 {% block css %}
@@ -53,7 +53,6 @@
             </div>
 
             <div class="row">
-                {% cache 30 products %}
                 {% for product in products %}
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card h-100">
@@ -77,7 +76,6 @@
                     </div>
                 </div>
                 {% endfor %}
-                {% endcache %}
             </div>
 
             {% if is_paginated %}

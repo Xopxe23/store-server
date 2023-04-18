@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView
+from django.views.generic import DetailView, ListView, TemplateView
 from django.views.generic.edit import CreateView
 
 from common.views import TitleMixin
@@ -65,11 +65,9 @@ def stripe_webhook_view(request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-    except ValueError as e:
-        # Invalid payload
+    except ValueError:
         return HttpResponse(status=400)
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
+    except stripe.error.SignatureVerificationError:
         return HttpResponse(status=400)
 
     # Handle the checkout.session.completed event
@@ -89,3 +87,26 @@ def fulfill_order(session):
     order_id = int(session.metadata.order_id)
     order = Order.objects.get(id=order_id)
     order.update_after_payment()
+
+
+class OrderListView(TitleMixin, ListView):
+    template_name = 'orders/orders.html'
+    title = 'Store - Заказы'
+    queryset = Order.objects.all()
+    context_object_name = 'orders'
+    ordering = ('-id',)
+
+    def get_queryset(self):
+        queryset = super(OrderListView, self).get_queryset()
+        return queryset.filter(initiator=self.request.user)
+
+
+class OrderDetailView(DetailView):
+    template_name = 'orders/order.html'
+    model = Order
+    context_object_name = 'order'
+
+    def get_context_data(self, **kwargs):
+        context = super(OrderDetailView, self).get_context_data()
+        context['title'] = f'Заказ №{self.object.id}'
+        return context

@@ -10,25 +10,56 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import environ
+
 from pathlib import Path
 
 import django
 from django.conf import settings
 
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool,),
+    SECRET_KEY=(str,),
+    DOMAIN_NAME=(str,),
+
+    REDIS_HOST=(str,),
+    REDIS_PORT=(str,),
+
+    DATABASE_NAME=(str,),
+    DATABASE_USER=(str,),
+    DATABASE_PASSWORD=(str,),
+    DATABASE_HOST=(str,),
+    DATABASE_PORT=(str,),
+
+    EMAIL_HOST=(str,),
+    EMAIL_PORT=(int,),
+    EMAIL_HOST_USER=(str,),
+    EMAIL_HOST_PASSWORD=(str,),
+    EMAIL_USE_SSL=(bool,),
+
+    STRIPE_PUBLIC_KEY=(str,),
+    STRIPE_SECRET_KEY=(str,),
+    STRIPE_WEBHOOK_SECRET=(str,),
+)
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Take environment variables from .env file
+environ.Env.read_env(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-z&d$1j8a81$c5ud2$dsywxq=ppc6ejj@6j$0)gat*#7n__zupg'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
-DOMAIN_NAME = 'http://localhost:8000'
+DOMAIN_NAME = env('DOMAIN_NAME')
 
 # Application definition
 
@@ -90,10 +121,17 @@ INTERNAL_IPS = [
     'localhost'
 ]
 
+# Redis
+
+REDIS_HOST = env('REDIS_HOST')
+REDIS_PORT = env('REDIS_PORT')
+
+# Cashes
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'LOCATION': f'redis://{REDIS_PORT}:{REDIS_PORT}/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
@@ -167,14 +205,14 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Sending email
-
-EMAIL_HOST = 'smtp.yandex.ru'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'grigoriyizmailov23@yandex.ru'
-EMAIL_HOST_PASSWORD = 'GriIzm23'
-EMAIL_USE_SSL = True
-
-# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    EMAIL_HOST = env('EMAIL_HOST')
+    EMAIL_PORT = env('EMAIL_PORT')
+    EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+    EMAIL_USE_SSL = env('EMAIL_USE_SSL')
 
 # AllAuth
 
@@ -195,11 +233,11 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # Celery
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}'
 
 # Stripe
 
-STRIPE_PUBLIC_KEY = 'pk_test_51MxWMsAZwqsazchS5vB1Dnw0ILqsrn0RsS7ug0zmJ8RZSb5DAmTreS5h9vsfOLiJJm7SpFckl6WYFy4s7azLKxXO00EegYaLo4'
-STRIPE_SECRET_KEY = 'sk_test_51MxWMsAZwqsazchSVV7OZYEWYNShAd9Ig06JMi9Hi5ThzCBNl1SatrxcosnEqfejouymRCmjGjNx53Bd11RwbrjW00n2gvXVb9'
-STRIPE_WEBHOOK_SECRET = 'whsec_00d9ced0d5e074ebb5f04dc5febf827317e8a817e138b0f11b9b9da4e12f9bad'
+STRIPE_PUBLIC_KEY = env('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET')

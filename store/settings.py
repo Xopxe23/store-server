@@ -19,28 +19,28 @@ from django.conf import settings
 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool,),
-    SECRET_KEY=(str,),
-    DOMAIN_NAME=(str,),
+    DEBUG=(bool),
+    SECRET_KEY=(str),
+    DOMAIN_NAME=(str),
 
-    REDIS_HOST=(str,),
-    REDIS_PORT=(str,),
+    REDIS_HOST=(str),
+    REDIS_PORT=(str),
 
-    DATABASE_NAME=(str,),
-    DATABASE_USER=(str,),
-    DATABASE_PASSWORD=(str,),
-    DATABASE_HOST=(str,),
-    DATABASE_PORT=(str,),
+    DATABASE_NAME=(str),
+    DATABASE_USER=(str),
+    DATABASE_PASSWORD=(str),
+    DATABASE_HOST=(str),
+    DATABASE_PORT=(str),
 
-    EMAIL_HOST=(str,),
-    EMAIL_PORT=(int,),
-    EMAIL_HOST_USER=(str,),
-    EMAIL_HOST_PASSWORD=(str,),
-    EMAIL_USE_SSL=(bool,),
+    EMAIL_HOST=(str),
+    EMAIL_PORT=(int),
+    EMAIL_HOST_USER=(str),
+    EMAIL_HOST_PASSWORD=(str),
+    EMAIL_USE_SSL=(bool),
 
-    STRIPE_PUBLIC_KEY=(str,),
-    STRIPE_SECRET_KEY=(str,),
-    STRIPE_WEBHOOK_SECRET=(str,),
+    STRIPE_PUBLIC_KEY=(str),
+    STRIPE_SECRET_KEY=(str),
+    STRIPE_WEBHOOK_SECRET=(str),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -145,11 +145,11 @@ CACHES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'store_db',
-        'USER': 'store_username',
-        'PASSWORD': 'store_password',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
+        'HOST': env('DATABASE_HOST'),
+        'PORT': env('DATABASE_PORT'),
     }
 }
 
@@ -188,7 +188,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (BASE_DIR / 'static',)
+
+if DEBUG:
+    STATICFILES_DIRS = (BASE_DIR / 'static',)
+else:
+    STATIC_ROOT = BASE_DIR / 'static'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

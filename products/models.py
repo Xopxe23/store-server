@@ -24,7 +24,7 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
     quantity = models.PositiveIntegerField(default=0)
-    image = models.ImageField(upload_to='products_images')
+    image = models.ImageField(upload_to='products_images', blank=True, null=True)
     stripe_product_price_id = models.CharField(max_length=128, blank=True, null=True)
     category = models.ForeignKey('ProductCategory', on_delete=models.CASCADE)
 
